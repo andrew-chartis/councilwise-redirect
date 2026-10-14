@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Redirecting to Pozi...</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; color: #333; }
+    .error { color: #d9534f; background: #fdf7f7; border: 1px solid #d9534f; padding: 1rem; border-radius: 4px; }
+  </style>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      
+      const config = (params.get('config') || '').toLowerCase();
+      const site = params.get('site');
+      const map = params.get('map');
+      const id = params.get('id');
+
+      const missing = [];
+
+      // 1. Validate 'config'
+      if (!config) {
+        missing.push("config ('legacy' or 'sitemanager')");
+      } else if (config !== 'legacy' && config !== 'sitemanager') {
+        displayError(`Invalid config mode: "${config}". Expected 'legacy' or 'sitemanager'.`);
+        return;
+      }
+
+      // 2. Validate common required parameters
+      if (!site) missing.push("site");
+      if (!id) missing.push("id");
+
+      // 3. Validate SiteManager specific parameters
+      if (config === 'sitemanager' && !map) {
+        missing.push("map");
+      }
+
+      // If any required parameters are missing, halt and display error
+      if (missing.length > 0) {
+        displayError(`Missing required parameter(s): <strong>${missing.join(', ')}</strong>`);
+        return;
+      }
+
+      // Build target URL after validation passes
+      let poziUrl = '';
+      if (config === 'legacy') {
+        poziUrl = `https://${site}.enterprise.pozi.com/#/search[AssessmentNumber,${id}]`;
+      } else if (config === 'sitemanager') {
+        poziUrl = `https://${site}.pozi.com/#/map[${map}]/search[AssessmentNumber,${id}]`;
+      }
+
+      // Execute redirect
+      window.location.href = poziUrl;
+    });
+
+    function displayError(message) {
+      document.getElementById('status').className = 'error';
+      document.getElementById('status').innerHTML = `<h3>Redirect Failed</h3><p>${message}</p>`;
+    }
+  </script>
+</head>
+<body>
+  <div id="status">Redirecting to Pozi GIS...</div>
+</body>
+</html>
