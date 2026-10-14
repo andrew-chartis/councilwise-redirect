@@ -14,6 +14,7 @@
       const config = (params.get('config') || '').toLowerCase();
       const site = params.get('site');
       const map = params.get('map');
+      const search = params.get('search');
       const id = params.get('id');
 
       const missing = [];
@@ -26,30 +27,31 @@
         return;
       }
 
-      // 2. Validate common required parameters
+      // 2. Validate parameters common to BOTH configs
       if (!site) missing.push("site");
+      if (!search) missing.push("search");
       if (!id) missing.push("id");
 
-      // 3. Validate SiteManager specific parameters
+      // 3. Validate parameters required ONLY by SiteManager
       if (config === 'sitemanager' && !map) {
         missing.push("map");
       }
 
-      // If any required parameters are missing, halt and display error
+      // Stop execution and alert if parameters are missing
       if (missing.length > 0) {
         displayError(`Missing required parameter(s): <strong>${missing.join(', ')}</strong>`);
         return;
       }
 
-      // Build target URL after validation passes
+      // 4. Construct target URL
       let poziUrl = '';
       if (config === 'legacy') {
-        poziUrl = `https://${site}.enterprise.pozi.com/#/search[AssessmentNumber,${id}]`;
+        poziUrl = `https://${site}.enterprise.pozi.com/#/search[${search},${id}]`;
       } else if (config === 'sitemanager') {
-        poziUrl = `https://${site}.pozi.com/#/map[${map}]/search[AssessmentNumber,${id}]`;
+        poziUrl = `https://${site}.pozi.com/#/map[${map}]/search[${search},${id}]`;
       }
 
-      // Execute redirect
+      // 5. Execute redirect
       window.location.href = poziUrl;
     });
 
